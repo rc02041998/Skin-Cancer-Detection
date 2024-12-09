@@ -121,9 +121,3 @@ The model achieves significant accuracy on the test dataset. The following metri
 - Test Loss: `...`
 - Test Accuracy: `...`
 
-## License
-This project is licensed under the MIT License.
-
---- 
-
-Let me know if you'd like further adjustments or additions!
