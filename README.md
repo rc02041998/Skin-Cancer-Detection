@@ -1,96 +1,129 @@
-# README: Dual-Model Image Classification using ResNet50 and Custom CNN with Attention Mechanism
+Here's the updated README file including the provided code:
 
-## Overview
-This project is a dual-model image classification pipeline integrating a pre-trained ResNet50 and a custom convolutional neural network (CNN) with a global attention mechanism. The model is designed to classify images into two categories with robust feature extraction and attention-based feature refinement.
+---
 
-## Features
-- **Pre-trained ResNet50**: Extracts rich features from images.
-- **Custom CNN**: Provides additional feature extraction with a parallel architecture.
-- **Global Attention Block**: Refines features to focus on significant regions of the image.
-- **Data Augmentation**: Improves model generalization.
-- **Flexible Training**: Fully trainable layers with learning rate decay and checkpointing.
+# Advanced Image Classification with Dual Attention Model
 
-## Requirements
-- Python 3.7 or higher
-- TensorFlow 2.x
-- Keras
-- NumPy
-- Matplotlib
-- Pandas
-- Seaborn
-- tqdm
-- PIL (Pillow)
-- scikit-learn
+This project implements an advanced image classification pipeline using a dual-attention mechanism with DenseNet121 and a custom-defined parallel convolutional network. The model is trained to classify images into two categories.
 
-Install the dependencies using:
+## Table of Contents
+1. [Introduction](#introduction)
+2. [Setup](#setup)
+3. [Dependencies](#dependencies)
+4. [Usage](#usage)
+5. [Code Walkthrough](#code-walkthrough)
+6. [Results](#results)
+7. [License](#license)
+
+---
+
+## Introduction
+This project explores deep learning techniques for image classification. A combination of DenseNet121 and a custom-defined convolutional network, enhanced with attention mechanisms, is employed to achieve high accuracy. 
+
+## Setup
+To run this project:
+1. Clone the repository.
+2. Prepare the data as per the instructions. Two datasets (`0.csv` and `1.csv`) are required, each containing image paths and labels.
+3. Install the necessary dependencies.
+
+## Dependencies
+The following Python libraries are required:
+- `matplotlib`
+- `numpy`
+- `pandas`
+- `seaborn`
+- `tensorflow`
+- `keras`
+- `sklearn`
+- `PIL`
+- `plot-metric`
+
+Install all dependencies using the following command:
 ```bash
 pip install -r requirements.txt
 ```
 
-## Dataset
-- **Input**: Images organized into two categories (`0` and `1`) with corresponding CSV files (`0.csv`, `1.csv`) containing image names and labels.
-- **Preprocessing**: Images are resized to `224x224` and normalized to `[0, 1]`.
-
-## Model Architecture
-### 1. **ResNet50**:
-- Pre-trained on ImageNet.
-- Truncated at the final convolutional block.
-
-### 2. **Custom CNN**:
-- Multiple convolutional blocks with concatenation and feature refinement.
-- Designed to capture diverse spatial features.
-
-### 3. **Global Attention Block**:
-- Refines features by emphasizing important regions.
-- Combines channel-wise and spatial attention.
-
-### 4. **Final Model**:
-- Combines features from ResNet50 and the custom CNN using concatenation.
-- Applies global average pooling and dense layers for binary classification.
-
-## Training and Validation
-- **Hyperparameters**:
-  - Learning Rate: `0.0001`
-  - Loss Function: Binary Cross-Entropy
-  - Optimizer: Adam
-  - Epochs: `70`
-  - Batch Size: `32`
-- **Callbacks**:
-  - ReduceLROnPlateau: Adjusts learning rate based on validation loss.
-  - ModelCheckpoint: Saves the best model based on validation accuracy.
-
 ## Usage
-1. **Prepare Dataset**:
-   - Place images in directories `0/` and `1/`.
-   - Create `0.csv` and `1.csv` containing `image_name` and `target` columns.
-
-2. **Run Training**:
-   Execute the script to preprocess data, train the model, and save checkpoints:
+1. Prepare datasets in the specified format.
+2. Run the training script to train the model:
    ```bash
-   python train.py
+   python train_model.py
    ```
+3. Evaluate the model on the test set.
 
-3. **Evaluate**:
-   Evaluate the model on the test set:
-   ```bash
-   python evaluate.py
-   ```
+## Code Walkthrough
+### Data Preprocessing
+```python
+# Load and preprocess datasets
+train_set_0 = pd.read_csv('0.csv')
+train_set_1 = pd.read_csv('1.csv')
 
-4. **Visualize**:
-   Plot accuracy vs. epochs:
-   ```bash
-   python plot_results.py
-   ```
+# Load and normalize images
+for i in tqdm(range(train_set_0.shape[0])):
+    img = tf.keras.utils.load_img('0/' + train_set_0['image_name'][i], target_size=(224,224,3))
+```
+
+### Model Definition
+- **Global Attention Block:** Enhances feature extraction with attention mechanisms.
+- **Custom Model:** A parallel convolutional model is defined and combined with DenseNet121 for feature extraction.
+
+```python
+# Define the custom convolutional network
+def define_model():
+    # Custom architecture with parallel convolutional blocks
+    ...
+    return model
+
+# Combine DenseNet121 with custom architecture
+model1 = tf.keras.applications.DenseNet121(include_top=False, weights='imagenet', input_shape=(224,224,3))
+model2 = define_model()
+
+# Combine features using attention
+conc = tf.keras.layers.Concatenate()([model1_out, model2_out])
+attend_feature_1 = Global_attention_block(conc)
+```
+
+### Training
+The model is compiled and trained using a learning rate scheduler and checkpointing.
+
+```python
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=lr2),
+              loss='sparse_categorical_crossentropy',
+              metrics=['acc'])
+
+history = model.fit([X_train_x, X_train_x], y_train_x,
+                    validation_data=([X_valid, X_valid], y_valid),
+                    epochs=70, batch_size=32)
+```
+
+### Evaluation
+The model's performance is evaluated using metrics like accuracy, loss, confusion matrix, and ROC curve.
+
+```python
+score = model.evaluate([X_test, X_test], y_test, batch_size=32)
+print('Test Accuracy:', score[1])
+
+# Generate confusion matrix
+matrix = confusion_matrix(y_test, y_pred)
+```
+
+### Visualization
+Plots for accuracy, loss, and ROC curve provide insights into the training process.
+
+```python
+plt.plot(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('Model Accuracy')
+```
 
 ## Results
-- **Test Loss**: [Output from the script]
-- **Test Accuracy**: [Output from the script]
-
-## Visualization
-Accuracy vs. Epoch graph is generated to monitor training and validation performance.
-
-## Contributions
-Feel free to submit issues or pull requests for improvements.
+The model achieves significant accuracy on the test dataset. The following metrics are calculated:
+- Test Loss: `...`
+- Test Accuracy: `...`
 
 ## License
-This project is licensed under the MIT License. See `LICENSE` for details.
+This project is licensed under the MIT License.
+
+--- 
+
+Let me know if you'd like further adjustments or additions!
